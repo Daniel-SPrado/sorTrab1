@@ -1,6 +1,7 @@
 #include <vector>
 #include <stdio.h>
 #include <iostream>
+#include <omp.h>
 
 #include "renderer.h"
 #include "../lib/lodepng/lodepng.h"
@@ -10,37 +11,42 @@ inline double clamp(double x){ return x<0 ? 0 : x>1 ? 1 : x; }
 // Clamp to between 0-255
 inline int toInt(double x){ return int(clamp(x)*255+.5); }
 
-
 Renderer::Renderer(Scene *scene, Camera *camera) {
     m_scene = scene;
     m_camera = camera;
-    //Pega a 'altura' e 'largura' da scene e camera em um Vec e salva na variável m_pixel_buffer
     m_pixel_buffer = new Vec[m_camera->get_width()*m_camera->get_height()];
 }
-//
+
 void Renderer::render(int samples) {
     int width = m_camera->get_width();
     int height = m_camera->get_height();
+
     double samples_recp = 1./samples;
 
     // Main Loop
-    // De 0 até Y de altura
     for (int y=0; y<height; y++){
-        unsigned short Xi[3]={0,0,y*y*y};               // Stores seed for erand48
-        // O que aparece na hr de processar os dados com o nº de samples
+        unsigned short Xi[3]={0,0,y};               // Stores seed for erand48
+
         fprintf(stderr, "\rRendering (%i samples): %.2f%% ",      // Prints
                 samples, (double)y/height*100);                   // progress
-        // De 0 até X largura
-        for (int x=0; x<width; x++){
-            Vec col = Vec();
 
-            for (int a=0; a<samples; a++){
-                Ray ray = m_camera->get_ray(x, y, a>0, Xi);
-                col = col + m_scene->trace_ray(ray,0,Xi);
-            }
+	omp_set_num_threads(width);
+
+	#pragma omp parallel
+	{
+                Vec col = Vec();
+		int x = omp_get_thread_num();
+
+		for(int a = 0; a < samples; a++){
+                	Ray ray = m_camera->get_ray(x, y, a>0, Xi);
+                	col = col + m_scene->trace_ray(ray,0,Xi);
+		}
+
 
             m_pixel_buffer[(y)*width + x] = col * samples_recp;
-        }
+
+	}
+
     }
 }
 
