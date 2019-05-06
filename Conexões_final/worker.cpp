@@ -16,7 +16,6 @@
 #include <unistd.h>
 #include "sort.hpp"
 #define PORT_WORKER 5000
-//#define PORT_CLIENT 8080
 
 using namespace std;
 
@@ -90,7 +89,7 @@ int main()
     int addrlen = sizeof(address);
     char buffer[1024] = {0};
     char buffer1[1024] = {0};
-    char *response = "Servidor: Dados recebidos com sucesso.";
+    char *response;
     srand(time(NULL));
     int j = 1, i=0;
     bool verificado = false, escutando = true;
@@ -104,7 +103,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port 5000
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
                                                   &opt, sizeof(opt)))
     {
@@ -116,7 +115,7 @@ int main()
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT_WORKER );
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port 5000
 
       if (bind(server_fd, (struct sockaddr *)&address,
                                    sizeof(address))<0)
@@ -146,19 +145,16 @@ while (1) {
           for(int k = 0; k < sizeof (buffer1); k++)
             buffer1[k] = {0};
 
-          //send(new_socket , response, strlen(response) , 0);
-
           cout << endl;
           cout << "Mensagem recebida: " << task << endl;
 
-          //char *p = &task.at(0);
+          //------------- Processamento do pixel(task)-------------------
+          //para modificar a mensagem, modificar a variavel response
 
-  //        char *message;
-//          message = new char[sizeof("[0;0;0]")];
+          response = &task.at(0);
 
-//          message = p;
-
-          //createConnection_8080(message);
+          //Envio de volta para o proxy
+          send(new_socket , response, strlen(response) , 0);
         }
     return 0;
 }

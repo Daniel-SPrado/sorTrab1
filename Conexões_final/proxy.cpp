@@ -52,6 +52,9 @@ int createConnection_5000(const char *message) {
   cout << "----- Mensagens da comunicação cliente-servidor ----- \n";
 
   send( sock , message , strlen(message) , 0 );
+
+  read( sock , buffer, 50);
+  printf("%s\n",buffer );
 }
 
 int main()
