@@ -9,7 +9,7 @@
 
 std::mutex mtx;
 
-#define N 100
+#define N 4
 
 // Clamp double to min/max of 0/1
 inline double clamp(double x){ return x<0 ? 0 : x>1 ? 1 : x; }
@@ -70,8 +70,6 @@ void Renderer::render(int samples) {
 	pthread_t threads[N];
 	thread_data tdata[N];
 
-
-    // Main Loop
 	for(int y = 0; y < N; y++){
 		tdata[y].w = width;
 		tdata[y].h = height;
@@ -84,7 +82,7 @@ void Renderer::render(int samples) {
 	}
 	for (int y=0; y<N; y++)
 		pthread_create(&threads[y], NULL, worker, (void *)&tdata[y]);
-	for(int k= 0; k<N;k++){
+	for(int k= 0; k<N; k++){
 	        fprintf(stderr, "\rRendering (%i samples): %.2f%% ",      // Prints
 	                samples, (double)(k+1)/N*100);                   // progress
 		pthread_join(threads[k], NULL);
@@ -98,8 +96,6 @@ void Renderer::save_image(const char *file_path) {
     std::vector<unsigned char> pixel_buffer;
 
     int pixel_count = width*height;
- //   thread_data tdata;
- //   m_pixel_buffer = tdata.m_p_buffer;
 
     for (int i=0; i<pixel_count; i++) {
         pixel_buffer.push_back(toInt(m_pixel_buffer[i].x));
