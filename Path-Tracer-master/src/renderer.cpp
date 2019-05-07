@@ -9,7 +9,7 @@
 
 std::mutex mtx;
 
-#define N 10
+#define N 100
 
 // Clamp double to min/max of 0/1
 inline double clamp(double x){ return x<0 ? 0 : x>1 ? 1 : x; }
@@ -42,22 +42,14 @@ void *worker(void *arg)
 	int k = tdata->i;
 	double samples_recp = tdata->sr;
 	int samples = tdata->s;
-	std::cout << k << std::endl;
 
 	for(int y = k*(height/N);y < (k+1)*(height/N); y++)
 	{
         	unsigned short Xi[3]={0,0,y};               // Stores seed for erand48
 
-        //	fprintf(stderr, "\rRendering (%i samples): %.2f%% ",      // Prints
-          //      samples, (double)y/(height*100);                   // progress
-
-		//omp_set_num_threads(width);
-
 		for(int x =0; x <width;x++)
 		{
         	        Vec col = Vec();
-			//int x = omp_get_thread_num();
-
 			for(int a = 0; a < samples; a++)
 			{
         	        	Ray ray = tdata->m_c->get_ray(x, y, a>0, Xi);
@@ -92,8 +84,11 @@ void Renderer::render(int samples) {
 	}
 	for (int y=0; y<N; y++)
 		pthread_create(&threads[y], NULL, worker, (void *)&tdata[y]);
-	for(int k= 0; k<N;k++)
+	for(int k= 0; k<N;k++){
+	        fprintf(stderr, "\rRendering (%i samples): %.2f%% ",      // Prints
+	                samples, (double)(k+1)/N*100);                   // progress
 		pthread_join(threads[k], NULL);
+	}
 }
 
 void Renderer::save_image(const char *file_path) {
