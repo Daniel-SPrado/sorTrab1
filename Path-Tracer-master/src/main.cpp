@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "time.h"
 
 #include "vector.h"
@@ -27,12 +28,12 @@ int main(int argc, char *argv[]) {
 
     time_t start, stop;
     time(&start);               // Start execution timer
-    int samples = 4;            // Default samples per pixel
+    int samples = 4;             //Default samples per pixel
 
     if (argc == 2) samples = atoi(argv[1]);
 
-    Camera camera = Camera(Vec(0, -5, 2.5), Vec(0,0,1), 1280,  720);     // Create camera
-    Scene scene = Scene();                                               // Create scene
+    Camera camera = Camera(Vec(0, -5, 2.5), Vec(0,0,1), 1280, 720);     // Create camera
+    Scene scene = Scene();                                              // Create scene
 
     // Add objects to scene
     scene.add( dynamic_cast<Object*>(new Sphere(Vec(0,0,-1000), 1000, Material())) );
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
     scene.add( dynamic_cast<Object*>(new Mesh(Vec(), "../obj/dragon2.obj", Material(DIFF, Vec(0.9, 0.9, 0.9)))) );
 
 
-    renderer renderer = renderer(&scene, &camera);  // Create renderer with our scene and camera
+    Renderer renderer = Renderer(&scene, &camera);  // Create renderer with our scene and camera
     renderer.render(samples);                       // Render image to pixel buffer
     renderer.save_image("render.png");              // Save image
 
